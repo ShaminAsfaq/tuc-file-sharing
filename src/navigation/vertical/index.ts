@@ -13,78 +13,123 @@ import GoogleCirclesExtended from 'mdi-material-ui/GoogleCirclesExtended'
 // ** Type import
 import { VerticalNavItemsType } from 'src/@core/layouts/types'
 import FileUploadUI from "../../pages/file-upload";
-import {Attachment, Upload} from "mdi-material-ui";
+import {Attachment, DownloadOutline, Upload} from "mdi-material-ui";
+import {DownloadDoneOutlined} from "@mui/icons-material";
+import {useEffect, useState} from "react";
 
 const navigation = (): VerticalNavItemsType => {
-  return [
-    {
-      sectionTitle: 'Start'
-    },
-    {
+  const [user, setUser] = useState({});
+
+  useEffect(() => {
+    const userItem = localStorage.getItem('user');
+    const user = JSON.parse(userItem);
+    setUser(user);
+  }, []);
+
+
+  const tempList = [];
+  if (user?.adminFlag) {
+    tempList.push({
       title: 'Dashboard',
       icon: HomeOutline,
-      path: '/'
-    },
+      path: '/dash-panel'
+    });
+  }
+
+  tempList.push(
     {
       title: 'File Upload',
       icon: Upload,
       path: '/file-upload'
     },
     {
-      title: 'Account Settings',
-      icon: AccountCogOutline,
-      path: '/account-settings'
+      title: 'Download',
+      icon: DownloadOutline,
+      path: '/download-file'
     },
-    {
-      sectionTitle: 'Pages'
-    },
-    {
-      title: 'Login',
-      icon: Login,
-      path: '/pages/login',
-      openInNewTab: true
-    },
-    {
-      title: 'Register',
-      icon: AccountPlusOutline,
-      path: '/pages/register',
-      openInNewTab: true
-    },
-    {
-      title: 'Error',
-      icon: AlertCircleOutline,
-      path: '/pages/error',
-      openInNewTab: true
-    },
-    {
-      sectionTitle: 'User Interface'
-    },
-    {
-      title: 'Typography',
-      icon: FormatLetterCase,
-      path: '/typography'
-    },
-    {
-      title: 'Icons',
-      path: '/icons',
-      icon: GoogleCirclesExtended
-    },
-    {
-      title: 'Cards',
-      icon: CreditCardOutline,
-      path: '/cards'
-    },
-    {
-      title: 'Tables',
-      icon: Table,
-      path: '/tables'
-    },
-    {
-      icon: CubeOutline,
-      title: 'Form Layouts',
-      path: '/form-layouts'
-    }
-  ]
+  );
+
+  return tempList;
+
+  // return [
+  //   {
+  //     sectionTitle: 'Start'
+  //   },
+  //   // {
+  //   //   title: 'Dashboard',
+  //   //   icon: HomeOutline,
+  //   //   path: '/'
+  //   // },
+  //   {
+  //     title: 'Dashboard',
+  //     icon: HomeOutline,
+  //     path: '/dash-panel'
+  //   },
+  //   {
+  //     title: 'File Upload',
+  //     icon: Upload,
+  //     path: '/file-upload'
+  //   },
+  //   {
+  //     title: 'Download',
+  //     icon: DownloadOutline,
+  //     path: '/download-file'
+  //   },
+  //   // {
+  //   //   title: 'Account Settings',
+  //   //   icon: AccountCogOutline,
+  //   //   path: '/account-settings'
+  //   // },
+  //   // {
+  //   //   sectionTitle: 'Pages'
+  //   // },
+  //   // {
+  //   //   title: 'Login',
+  //   //   icon: Login,
+  //   //   path: '/pages/login',
+  //   //   openInNewTab: true
+  //   // },
+  //   // {
+  //   //   title: 'Register',
+  //   //   icon: AccountPlusOutline,
+  //   //   path: '/pages/register',
+  //   //   openInNewTab: true
+  //   // },
+  //   // {
+  //   //   title: 'Error',
+  //   //   icon: AlertCircleOutline,
+  //   //   path: '/pages/error',
+  //   //   openInNewTab: true
+  //   // },
+  //   // {
+  //   //   sectionTitle: 'User Interface'
+  //   // },
+  //   // {
+  //   //   title: 'Typography',
+  //   //   icon: FormatLetterCase,
+  //   //   path: '/typography'
+  //   // },
+  //   // {
+  //   //   title: 'Icons',
+  //   //   path: '/icons',
+  //   //   icon: GoogleCirclesExtended
+  //   // },
+  //   // {
+  //   //   title: 'Cards',
+  //   //   icon: CreditCardOutline,
+  //   //   path: '/cards'
+  //   // },
+  //   // {
+  //   //   title: 'Tables',
+  //   //   icon: Table,
+  //   //   path: '/tables'
+  //   // },
+  //   // {
+  //   //   icon: CubeOutline,
+  //   //   title: 'Form Layouts',
+  //   //   path: '/form-layouts'
+  //   // }
+  // ]
 }
 
 export default navigation

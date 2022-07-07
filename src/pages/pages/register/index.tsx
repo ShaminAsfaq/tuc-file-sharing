@@ -37,8 +37,13 @@ import BlankLayout from 'src/@core/layouts/BlankLayout'
 
 // ** Demo Imports
 import FooterIllustrationsV1 from 'src/views/pages/auth/FooterIllustration'
+import axios from "axios";
+import toast, {Toaster} from "react-hot-toast";
+import {router} from "next/client";
 
 interface State {
+  email: string,
+  userName: string,
   password: string
   showPassword: boolean
 }
@@ -66,6 +71,8 @@ const FormControlLabel = styled(MuiFormControlLabel)<FormControlLabelProps>(({ t
 const RegisterPage = () => {
   // ** States
   const [values, setValues] = useState<State>({
+    email: '',
+    userName: '',
     password: '',
     showPassword: false
   })
@@ -82,9 +89,33 @@ const RegisterPage = () => {
   const handleMouseDownPassword = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault()
   }
+  const handleOnRegister = (e: any) => {
+    e.preventDefault();
+    let user = {
+      userName: values.userName,
+      password: values.password,
+      contact: {
+        email: {
+          primaryEmail: values.email
+        }
+      }
+    }
+    console.log(values);
+
+    const req = axios.post(`http://localhost:8080/user_controller/create_user`, user);
+    toast.promise(req, {
+      loading: 'Creating User',
+      success: () => {
+        router.push('/pages/login');
+        return 'User Creation Successful';
+      },
+      error: 'Something went wrong'
+    });
+  }
 
   return (
     <Box className='content-center'>
+      <Toaster/>
       <Card sx={{ zIndex: 1 }}>
         <CardContent sx={{ padding: theme => `${theme.spacing(12, 9, 7)} !important` }}>
           <Box sx={{ mb: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -166,9 +197,9 @@ const RegisterPage = () => {
             </Typography>
             <Typography variant='body2'>Make your app management easy and fun!</Typography>
           </Box>
-          <form noValidate autoComplete='off' onSubmit={e => e.preventDefault()}>
-            <TextField autoFocus fullWidth id='username' label='Username' sx={{ marginBottom: 4 }} />
-            <TextField fullWidth type='email' label='Email' sx={{ marginBottom: 4 }} />
+          <form noValidate autoComplete='off' onSubmit={handleOnRegister}>
+            <TextField onChange={(input: any) => setValues({...values, userName: input.target.value})} autoFocus fullWidth id='username' label='Username' sx={{ marginBottom: 4 }} />
+            <TextField onChange={(input: any) => setValues({...values, email: input.target.value})} fullWidth type='email' label='Email' sx={{ marginBottom: 4 }} />
             <FormControl fullWidth>
               <InputLabel htmlFor='auth-register-password'>Password</InputLabel>
               <OutlinedInput

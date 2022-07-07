@@ -4,6 +4,10 @@ import {styled} from "@mui/material/styles";
 import Button, {ButtonProps} from "@mui/material/Button";
 import {ChangeEvent, ElementType, SetStateAction, useEffect, useState} from "react";
 import axios from "axios";
+import toast, { Toaster } from 'react-hot-toast';
+import Alert from "@mui/material/Alert";
+import * as React from "react";
+import {ContentCopy} from "@mui/icons-material";
 
 const ButtonStyled = styled(Button)<ButtonProps & { component?: ElementType; htmlFor?: string }>(({theme}) => ({
   [theme.breakpoints.down('sm')]: {
@@ -15,6 +19,10 @@ const ButtonStyled = styled(Button)<ButtonProps & { component?: ElementType; htm
 
 const FileUploadUI = () => {
   const [fileToBeUploaded, setFileToBeUploaded] = useState<any>([]);
+  const [fileUrlAfterDone, setFileUrlAfterDone] = useState('');
+  const [doneFlag, setDoneFlag] = useState(false);
+
+  const url = 'http://localhost:8080/file_controller/download/';
 
   const onChange = (e: any) => {
     let fileList: any[] = [];
@@ -25,11 +33,39 @@ const FileUploadUI = () => {
   }
 
   const onUpload = async () => {
+    setDoneFlag(false);
+    setFileUrlAfterDone('');
+    let tempPayload = fileToBeUploaded;
+    setFileToBeUploaded([]);
+
     let formData = new FormData();
     for(let idx = 0; idx < fileToBeUploaded.length; idx++) {
       formData.append('files', fileToBeUploaded[idx][1])
     }
-    await axios.post(`http://localhost:8080/photo_controller/upload_photo`, formData);
+
+    const req = axios.post(`http://localhost:8080/file_controller/upload_file`, formData);
+    await toast.promise(req, {
+      loading: 'Uploading',
+      success: (res) => {
+        setDoneFlag(true);
+        const urlToFile = url + res.data[0].id;
+        setFileUrlAfterDone(urlToFile);
+
+        return 'Upload successful!';
+      },
+      error: () => {
+        setFileToBeUploaded(tempPayload);
+        return 'Failed to upload.';
+      },
+    });
+  }
+
+  const handleOnCopyToClipBoard = () => {
+    navigator.clipboard.writeText(fileUrlAfterDone).then(() => {
+      // Alert the user that the action took place.
+      // Nobody likes hidden stuff being done under the hood!
+      toast.success('URL Copied to Clipboard!');
+    });
   }
 
   useEffect(() => {
@@ -38,19 +74,20 @@ const FileUploadUI = () => {
 
   return (
     <Box sx={{display: 'flex', alignItems: 'flex-start', flexDirection: 'column'}}>
+      <Toaster/>
       <Box>
         <ButtonStyled component='label' variant='contained' htmlFor='account-settings-upload-image'>
-          Upload New Photo
+          Select File
           <input
             hidden
             type='file'
             onChange={onChange}
-            // accept='image/png, image/jpeg'
+            accept="file_extension | audio/* | video/* | image/* | media_type"
             id='account-settings-upload-image'
           />
         </ButtonStyled>
         <Typography variant='body2' sx={{marginTop: 5}}>
-          Allowed PNG or JPEG. Max size of 800K.
+          Allowed any file type. Max size of 10 MB.
         </Typography>
       </Box>
       <Box sx={{ paddingTop: '5%' }}>
@@ -58,6 +95,17 @@ const FileUploadUI = () => {
           Upload
         </Button>
       </Box>
+      {(
+      doneFlag &&
+      <Box sx={{ paddingTop: '5%', width: '100%', display: 'flex' }}>
+        <Alert sx={{ width: '100%' }} severity='info'>
+          Download Link: {fileUrlAfterDone}
+        </Alert>
+        <Button onClick={handleOnCopyToClipBoard}>
+          <ContentCopy/>
+        </Button>
+      </Box>
+      )}
     </Box>
   );
 }

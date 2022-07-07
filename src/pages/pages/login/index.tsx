@@ -38,8 +38,11 @@ import BlankLayout from 'src/@core/layouts/BlankLayout'
 
 // ** Demo Imports
 import FooterIllustrationsV1 from 'src/views/pages/auth/FooterIllustration'
+import axios from "axios";
+import toast, {Toaster} from "react-hot-toast";
 
 interface State {
+  userName: string,
   password: string
   showPassword: boolean
 }
@@ -65,6 +68,7 @@ const FormControlLabel = styled(MuiFormControlLabel)<FormControlLabelProps>(({ t
 const LoginPage = () => {
   // ** State
   const [values, setValues] = useState<State>({
+    userName: '',
     password: '',
     showPassword: false
   })
@@ -85,8 +89,32 @@ const LoginPage = () => {
     event.preventDefault()
   }
 
+  const handleLogin = () => {
+    let user = {
+      userName: values.userName,
+      password: values.password,
+    }
+
+    const req = axios.post(`http://localhost:8080/user_controller/login`, user);
+    const toastId = toast.loading('Communicating Host..');
+    req.then(res => {
+      console.log(res);
+      if (res.data) {
+        // @ts-ignore
+        localStorage.setItem('user', JSON.stringify(res.data));
+        router.push('/dash-panel');
+        toast.dismiss(toastId);
+        toast.success('Login Successful! Redirecting..')
+      } else {
+        toast.dismiss(toastId);
+        toast.error('Credential Mismatch.')
+      }
+    })
+  }
+
   return (
     <Box className='content-center'>
+      <Toaster/>
       <Card sx={{ zIndex: 1 }}>
         <CardContent sx={{ padding: theme => `${theme.spacing(12, 9, 7)} !important` }}>
           <Box sx={{ mb: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -169,7 +197,7 @@ const LoginPage = () => {
             <Typography variant='body2'>Please sign-in to your account and start the adventure</Typography>
           </Box>
           <form noValidate autoComplete='off' onSubmit={e => e.preventDefault()}>
-            <TextField autoFocus fullWidth id='email' label='Email' sx={{ marginBottom: 4 }} />
+            <TextField onChange={(input: any) => setValues({...values, userName: input.target.value})} autoFocus fullWidth id='email' label='Email/User Name' sx={{ marginBottom: 4 }} />
             <FormControl fullWidth>
               <InputLabel htmlFor='auth-login-password'>Password</InputLabel>
               <OutlinedInput
@@ -205,7 +233,7 @@ const LoginPage = () => {
               size='large'
               variant='contained'
               sx={{ marginBottom: 7 }}
-              onClick={() => router.push('/')}
+              onClick={handleLogin}
             >
               Login
             </Button>
